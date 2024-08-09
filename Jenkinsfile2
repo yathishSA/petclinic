@@ -1,67 +1,82 @@
-pipeline
-{
+pipeline {
     agent any
-         tools
-         {
+    tools {
         jdk 'JDK'
         maven 'maven3'
-        }
+    }
     stages {
-         stage('clear workspace') {
-           steps {
+        stage('Clear Workspace') {
+            steps {
                 cleanWs deleteDirs: true
             }
         }
-        stage('Git checkout') {
+        stage('Git Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/anmolmishra334/Petclinic.git'
             }
         }
-        stage('maven clean package creation') {
-            
-        parallel {
-            stage ('maven validate') {
-                steps{
-                bat 'mvn validate'
+        stage('Maven Clean Package Creation') {
+            parallel {
+                stage('Maven Validate') {
+                    steps {
+                        bat 'mvn validate'
+                    }
+                }
+                stage('Maven Compile') {
+                    steps {
+                        bat 'mvn clean compile'
+                    }
+                }
+                stage('Maven Test') {
+                    steps {
+                        bat 'mvn test -DskipTests=True'
+                    }
+                }
             }
         }
-        stage('maven compile') {
-            steps {
-                bat 'mvn clean compile'
-            }
-        }
-        stage('maven test') {
-            steps {
-                bat 'mvn test -DskipTests=True'
-            }
-        }
-            }
-        }
-        stage('maven package') {
+        stage('Maven Package') {
             steps {
                 bat 'mvn clean package'
             }
         }
-        stage('maven archieve package') {
+        stage('Maven Archive Package') {
             steps {
                 archiveArtifacts artifacts: 'target/petclinic.war', followSymlinks: false
             }
         }
-        stage('PR approval request') {
+        stage('PR Approval Request') {
             steps {
                 timeout(time: 30, unit: 'SECONDS') {
-                input id: 'YES', message: 'Enter Yes or No for PR approval.', ok: 'YES', submitter: 'admin', submitterParameter: 'approval'
+                    input id: 'YES', message: 'Enter Yes or No for PR Request Creation.', ok: 'YES', submitter: 'admin', submitterParameter: 'approval'
+                }
             }
+        }
+        stage('Create Pull Request') {
+            steps {
+                script {
+                    def branchName = 'feature/new_branch' // Replace with the branch you want to merge
+                    def token = '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' // GitHub Personal Access Token
+                    def repo = 'anmolmishra334/Petclinic' // GitHub repo
+                    def prTitle = 'Auto PR from Jenkins'
+                    def prBody = 'This is an automated PR created by Jenkins after a successful build.'
+
+                    sh """
+                        curl -X POST -H "Authorization: token ${token}" -H "Accept: application/vnd.github.v3+json" \
+                        https://api.github.com/repos/${repo}/pulls \
+                        -d '{
+                            "title": "${prTitle}",
+                            "body": "${prBody}",
+                            "head": "${branchName}",
+                            "base": "main"
+                        }'
+                    """
+                }
             }
         }
         stage('Deploy to Tomcat') {
-      steps {
-            bat 'copy /Y target\\petclinic.war "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps"' 
+            steps {
+                bat 'copy /Y target\\petclinic.war "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps"'
             }
-    }
+        }
     }
 }
-
-
-
-
