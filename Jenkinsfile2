@@ -60,16 +60,11 @@ pipeline {
                     def prTitle = 'Auto PR from Jenkins'
                     def prBody = 'This is an automated PR created by Jenkins after a successful build.'
 
-                    sh """
-                        curl -X POST -H "Authorization: token ${token}" -H "Accept: application/vnd.github.v3+json" \
-                        https://api.github.com/repos/${repo}/pulls \
-                        -d '{
-                            "title": "${prTitle}",
-                            "body": "${prBody}",
-                            "head": "${branchName}",
-                            "base": "main"
-                        }'
-                    """
+                     bat """
+                curl -X POST -H "Authorization: token ${token}" -H "Accept: application/vnd.github.v3+json" ^
+                https://api.github.com/repos/${repo}/pulls ^
+                -d "{\\"title\\": \\"${prTitle}\\", \\"body\\": \\"${prBody}\\", \\"head\\": \\"${branchName}\\", \\"base\\": \\"main\\"}"
+            """
                 }
             }
         }
