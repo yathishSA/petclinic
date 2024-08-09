@@ -54,7 +54,7 @@ pipeline {
         stage('Create Pull Request') {
             steps {
                 script {
-                    def branchName = 'feature/new_branch' // Replace with the branch you want to merge
+                    def branchName = 'feature/new_branch_1' // Replace with the branch you want to merge
                     def token = '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' // GitHub Personal Access Token
                     def repo = 'anmolmishra334/Petclinic' // GitHub repo
                     def prTitle = 'Auto PR from Jenkins'
