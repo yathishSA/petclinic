@@ -1,7 +1,5 @@
 pipeline {
     agent any
-        IMAGE_NAME = 'your_dockerhub_username/your_image_name'
-        DOCKER_CREDENTIALS_ID = 'docker'
     environment{
         name= "Anmol"
         age= 23
