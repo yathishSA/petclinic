@@ -1,10 +1,10 @@
 pipeline {
     agent any
     enviornment{
-        "name"="Anmol"
-        "age"=23
-        "platform"="Jenkins"
-        "uses"="Automation"
+        name= "Anmol"
+        age= 23
+        platform= "Jenkins"
+        uses= "Automation"
 }
     tools {
         jdk 'JDK'
