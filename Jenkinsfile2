@@ -83,6 +83,10 @@ pipeline {
                 echo "$string_parameter_input"
             }
         }
+        stage('multi line patameter input') {
+            steps {
+                echo "$multi_line_string_parameter"
+            }
+        }
         }
     }
-}
