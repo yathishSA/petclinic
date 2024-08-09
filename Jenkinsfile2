@@ -1,5 +1,11 @@
 pipeline {
     agent any
+    enviornment{
+        "name": "Anmol"
+        "age": 23
+        "platform" : "Jenkins"
+        "uses": "Automation"
+}
     tools {
         jdk 'JDK'
         maven 'maven3'
@@ -86,6 +92,12 @@ pipeline {
         stage('multi line patameter input') {
             steps {
                 echo "$multi_line_string_parameter"
+            }
+        }
+       stage ('environment variables in Jenkinsfile')
+        {    
+            steps {
+                echo "My name is $name and my age is $age , I am using $platform platform for $uses"
             }
         }
         }
