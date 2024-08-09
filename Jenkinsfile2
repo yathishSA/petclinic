@@ -79,6 +79,9 @@ pipeline {
                 bat 'copy /Y target\\petclinic.war "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps"'
             }
         }
+        stage('Parameters and enviornment variables uses')
+        {
+        parallel {
         stage('Choice parameter') {
             steps {
                 echo "$choices"
@@ -101,4 +104,6 @@ pipeline {
             }
         }
         }
-    }
+    }    
+}
+}
