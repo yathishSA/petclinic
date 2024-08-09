@@ -54,7 +54,7 @@ pipeline {
         }
         stage('PR Approval Request') {
             steps {
-                timeout(time: 30, unit: 'SECONDS') {
+                timeout(time: 300, unit: 'SECONDS') {
                     input id: 'YES', message: 'Enter Yes or No for PR Request Creation.', ok: 'YES', submitter: 'admin', submitterParameter: 'approval'
                 }
             }
