@@ -86,8 +86,8 @@ pipeline {
         }
         stage('multi line string input') {
             steps {
-                echo "$multi_line_string_patameter"
-                mkdir $multi_line_string_patameter
+                echo "$multi_line_string_parameter"
+                mkdir $multi_line_string_parameter
             }
         }
     }
