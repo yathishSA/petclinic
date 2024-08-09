@@ -73,5 +73,22 @@ pipeline {
                 bat 'copy /Y target\\petclinic.war "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps"'
             }
         }
+        stage('Choice parameter') {
+            steps {
+                echo "$string_parameter_input"
+            }
+        }
+        stage('single patameter input') {
+            steps {
+                echo "$string_parameter_input"
+                mkdir $string_parameter_input
+            }
+        }
+        stage('multi line string input') {
+            steps {
+                echo "$multi_line_string_patameter"
+                mkdir $multi_line_string_patameter
+            }
+        }
     }
 }
