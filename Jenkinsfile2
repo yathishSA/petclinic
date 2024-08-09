@@ -39,7 +39,7 @@ pipeline {
                 }
                 stage('Maven Test') {
                     steps {
-                        bat 'mvn test -DskipTests=True'
+                        bat 'mvn test'
                     }
                 }
             }
@@ -136,7 +136,7 @@ pipeline {
         stage('Deploy to Minikube') {
             steps {
                 script {
-                    bat "kubectl config use-context %KUBERNETES_CONTEXT%"
+                   # bat "kubectl config use-context %KUBERNETES_CONTEXT%"
 
                     // Create deployment or update existing one
                     bat '''
@@ -156,7 +156,7 @@ pipeline {
                                 app: Petclinic-Project
                             spec:
                               containers:
-                              - name: petclinic-container
+                              - name: Petclinic-Project
                                 image: %IMAGE_NAME%:%IMAGE_TAG%
                                 ports:
                                 - containerPort: 80
