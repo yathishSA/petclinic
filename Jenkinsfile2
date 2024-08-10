@@ -149,6 +149,8 @@ pipeline {
         }
          stage('Deploy to Minikube') {
             steps {
+                bat 'kubectl delete deployment --all'
+                echo "all existing deployments delete
                  bat 'kubectl create deployment ${container_name} --image=${IMAGE_NAME}:${env.BUILD_ID}'
                 echo "$deployment successfully created for deployment $container_name"
                  bat 'kubectl expose deployment ${container_name} --port=80 --type=LoadBalancer'
