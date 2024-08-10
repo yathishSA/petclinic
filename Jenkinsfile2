@@ -55,7 +55,7 @@ pipeline {
             steps {
                 archiveArtifacts artifacts: 'target/petclinic.war', followSymlinks: false
             }
-        }
+        } /*
         stage('Upload to Nexus Repo') {
             steps {
                 withCredentials([usernamePassword(credentialsId: NEXUS_CREDENTIALS_ID, passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USERNAME')]) {
@@ -67,7 +67,7 @@ pipeline {
                     """
                 }
             }
-        }
+        } */
         stage('PR Approval Request') {
             steps {
                 timeout(time: 300, unit: 'SECONDS') {
