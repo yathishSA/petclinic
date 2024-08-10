@@ -151,19 +151,20 @@ pipeline {
     steps {
         script {
             // Delete all existing deployments
-            bat 'kubectl delete deployment --all'
+            echo "kubectl delete deployment --all"
             echo "All existing deployments deleted"
 
             // Create a new deployment
-            bat 'kubectl create deployment %container_name% --image=%IMAGE_NAME%:%BUILD_ID%'
-            echo "%container_name% successfully created"
+            echo "kubectl create deployment ${container_name} --image=${IMAGE_NAME}:${BUILD_ID}"
+
+            echo "${container_name} successfully created"
 
             // Expose the deployment on port 80 as a LoadBalancer service
-            bat 'kubectl expose deployment %container_name% --port=80 --type=LoadBalancer'
-            echo "%container_name% is successfully deployed on port 80"
+            echo "kubectl expose deployment ${container_name} --port=80 --type=LoadBalancer"
+            echo "${container_name} is successfully deployed on port 80"
 
             // Get the service URL from Minikube
-            bat 'minikube service %container_name% --url'
+            echo "minikube service ${container_name}"
             echo "Access application from the above link"
         }
     }
