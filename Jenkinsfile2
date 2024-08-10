@@ -60,18 +60,17 @@ pipeline {
                 archiveArtifacts artifacts: 'target/*.war', followSymlinks: false
             }
         } 
-        stage('Upload maven package to github') {
-            steps {
-                withCredentials([string(credentialsId: "${GIT_CREDENTIALS_ID}", variable: 'GITHUB_TOKEN')]) {
-                    bat """
-                        mvn deploy:deploy-file -DgroupId=com.example -DartifactId=spring-framework-petclinic \
-                        -Dversion=1.0.${env.BUILD_ID} -Dpackaging=war -Dfile=target/petclinic-${env.BUILD_ID}.war \
-                        -DrepositoryId=github -Durl=https://maven.pkg.github.com/anmolmishra334/Petclinic \
-                        -Dusername=your_github_username -Dpassword=${GITHUB_TOKEN}
-                    """
-                }
-            }
+    stage('Upload Maven Package to GitHub') {
+    steps {
+        script {
+            // Set the artifact version in the pom.xml to include the Jenkins build ID
+            bat "mvn versions:set -DnewVersion=1.0.${env.BUILD_ID}"
+
+            // Deploy the package to GitHub
+            bat "mvn deploy"
         }
+    }
+}
         stage('PR Approval Request') {
             steps {
                 timeout(time: 300, unit: 'SECONDS') {
