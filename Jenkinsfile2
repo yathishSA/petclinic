@@ -147,36 +147,36 @@ pipeline {
                 }
             }
         }
-/*
-        stage('Deploy to Minikube') {
+         stage('Deploy to Minikube') {
             steps {
                 script {
-                   # bat "kubectl config use-context %KUBERNETES_CONTEXT%"
+                    // Set Kubernetes context to Minikube
+                    bat "kubectl config use-context ${KUBERNETES_CONTEXT}"
 
                     // Create deployment or update existing one
-                    bat '''
+                    bat """
                         kubectl apply -f - <<EOF
                         apiVersion: apps/v1
                         kind: Deployment
                         metadata:
-                          name: Petclinic-Project
+                          name: petclinic-project
                         spec:
                           replicas: 1
                           selector:
                             matchLabels:
-                              app: Petclinic-Project
+                              app: petclinic-project
                           template:
                             metadata:
                               labels:
-                                app: Petclinic-Project
+                                app: petclinic-project
                             spec:
                               containers:
-                              - name: Petclinic-Project
-                                image: %IMAGE_NAME%:%IMAGE_TAG%
+                              - name: petclinic-container
+                                image: ${IMAGE_NAME}:${IMAGE_TAG}
                                 ports:
                                 - containerPort: 80
                         EOF
-                    '''
+                    """
                 }
             }
         }
@@ -184,13 +184,14 @@ pipeline {
             steps {
                 script {
                     // Expose the deployment as a LoadBalancer service
-                    bat '''
-                        kubectl expose deployment Petclinic-Project --type=LoadBalancer --port=80
-                    '''
-                    bat ''' minikube service Petclinic-project'''
+                    bat """
+                        kubectl expose deployment petclinic-project --type=LoadBalancer --name=petclinic-service --port=80 --target-port=80
+                    """
+
+                    // Get the URL to access the service
+                    bat 'minikube service petclinic-service --url'
                 }
             }
         }
-*/
     }
 }
