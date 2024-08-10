@@ -50,11 +50,12 @@ pipeline {
         stage('Maven Package Creation') {
             steps {
                 bat 'mvn clean package'
+                bat "rename target\\petclinic.war petclinic-${BUILD_ID}.war"
             }
         }
         stage('Maven Archive Package') {
             steps {
-                archiveArtifacts artifacts: 'target/petclinic.war', followSymlinks: false
+                archiveArtifacts artifacts: 'target/*.war', followSymlinks: false
             }
         } 
         stage('Upload maven package to github') {
@@ -101,7 +102,7 @@ pipeline {
 }
         stage('Deploy to Tomcat') {
             steps {
-                bat 'copy /Y target\\petclinic.war "C:\\tomcat\\webapps"'
+                bat 'copy /Y target\\*.war "C:\\tomcat\\webapps"'
             }
         }
         stage('Parameters and Environment Variables Usage') {
