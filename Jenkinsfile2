@@ -9,6 +9,8 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'docker_cred'
         KUBERNETES_CONTEXT = 'minikube'
         IMAGE_TAG = "${env.BUILD_ID}"
+        NEXUS_CREDENTIALS_ID = 'nexus-cred' // Nexus credentials ID
+        NEXUS_URL = 'http://localhost:8081/repository/maven-releases/
     }
     tools {
         jdk 'JDK'
@@ -52,6 +54,18 @@ pipeline {
         stage('Maven Archive Package') {
             steps {
                 archiveArtifacts artifacts: 'target/petclinic.war', followSymlinks: false
+            }
+        }
+        stage('Upload to Nexus Repo') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: NEXUS_CREDENTIALS_ID, passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USERNAME')]) {
+                    bat """
+                        mvn deploy:deploy-file -DgroupId=com.example -DartifactId=petclinic \
+                        -Dversion=${env.BUILD_ID} -Dpackaging=war -Dfile=target/petclinic.war \
+                        -DrepositoryId=nexus-releases -Durl=${NEXUS_URL} \
+                        -Dusername=${NEXUS_USERNAME} -Dpassword=${NEXUS_PASSWORD}
+                    """
+                }
             }
         }
         stage('PR Approval Request') {
