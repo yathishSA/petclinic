@@ -26,11 +26,6 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/anmolmishra334/Petclinic.git'
             }
         }
-        stage('Update Version with Build ID') {
-            steps {
-                bat "mvn versions:set -DnewVersion=1.0.${env.BUILD_ID}"
-            }
-        }
         stage('Maven Clean Package Creation') {
             parallel {
                 stage('Maven Validate') {
