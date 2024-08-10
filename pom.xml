@@ -551,10 +551,7 @@
             <name>Spring Milestone Repository</name>
             <url>https://repo.spring.io/milestone</url>
         </repository>
-    </repositories>
-         
- <repositories>
-        <repository>
+              <repository>
             <id>github</id>
             <url>https://maven.pkg.github.com/anmolmishra334/Petclinic</url>
         </repository>
