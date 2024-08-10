@@ -46,7 +46,7 @@ pipeline {
                 }
             }
         }
-        stage('Maven Package') {
+        stage('Maven Package Creation') {
             steps {
                 bat 'mvn clean package'
             }
@@ -56,6 +56,11 @@ pipeline {
                 archiveArtifacts artifacts: 'target/petclinic.war', followSymlinks: false
             }
         } /*
+        stage('Upload maven package to github') {
+            steps {
+                bat 'mvn deploy'
+            }
+        }
         stage('Upload to Nexus Repo') {
             steps {
                 withCredentials([usernamePassword(credentialsId: NEXUS_CREDENTIALS_ID, passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USERNAME')]) {
