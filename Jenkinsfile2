@@ -9,9 +9,7 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'docker_cred'
         KUBERNETES_CONTEXT = 'minikube'
         IMAGE_TAG = "${env.BUILD_ID}"
-      //  NEXUS_CREDENTIALS_ID = 'nexus-cred'
         GIT_CREDENTIALS_ID = 'github_secret_text_for_webhook'
-       // NEXUS_URL = 'http://localhost:8081/repository/maven-releases/'
     }
     tools {
         jdk 'JDK'
@@ -26,6 +24,11 @@ pipeline {
         stage('Git Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/anmolmishra334/Petclinic.git'
+            }
+        }
+        stage('Update Version with Build ID') {
+            steps {
+                bat "mvn versions:set -DnewVersion=1.0.${env.BUILD_ID}"
             }
         }
         stage('Maven Clean Package Creation') {
@@ -50,7 +53,6 @@ pipeline {
         stage('Maven Package Creation') {
             steps {
                 bat 'mvn clean package'
-                bat "rename target\\petclinic.war petclinic-${BUILD_ID}.war"
             }
         }
         stage('Maven Archive Package') {
@@ -60,21 +62,16 @@ pipeline {
         } 
         stage('Upload maven package to github') {
             steps {
-                bat 'mvn deploy'
-            }
-        }/*
-        stage('Upload to Nexus Repo') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: NEXUS_CREDENTIALS_ID, passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USERNAME')]) {
+                withCredentials([string(credentialsId: "${GIT_CREDENTIALS_ID}", variable: 'GITHUB_TOKEN')]) {
                     bat """
-                        mvn deploy:deploy-file -DgroupId=com.example -DartifactId=petclinic \
-                        -Dversion=${env.BUILD_ID} -Dpackaging=war -Dfile=target/petclinic.war \
-                        -DrepositoryId=nexus-releases -Durl=${NEXUS_URL} \
-                        -Dusername=${NEXUS_USERNAME} -Dpassword=${NEXUS_PASSWORD}
+                        mvn deploy:deploy-file -DgroupId=com.example -DartifactId=spring-framework-petclinic \
+                        -Dversion=1.0.${env.BUILD_ID} -Dpackaging=war -Dfile=target/petclinic-${env.BUILD_ID}.war \
+                        -DrepositoryId=github -Durl=https://maven.pkg.github.com/anmolmishra334/Petclinic \
+                        -Dusername=your_github_username -Dpassword=${GITHUB_TOKEN}
                     """
                 }
             }
-        } */
+        }
         stage('PR Approval Request') {
             steps {
                 timeout(time: 300, unit: 'SECONDS') {
@@ -86,7 +83,7 @@ pipeline {
             steps {
                 script {
                     def branchName = "new_branch_${env.BUILD_ID}"
-                    def repo = 'anmolmishra334/Petclinic' // GitHub repo
+                    def repo = 'anmolmishra334/Petclinic'
                     def prTitle = 'Auto PR from Jenkins'
                     def prBody = 'This is an automated PR created by Jenkins after a successful build.'
 
@@ -99,7 +96,7 @@ pipeline {
                     }
                 }
             }
-}
+        }
         stage('Deploy to Tomcat') {
             steps {
                 bat 'copy /Y target\\*.war "C:\\tomcat\\webapps"'
@@ -155,28 +152,22 @@ pipeline {
                 }
             }
         }
-         stage('Deploy to Minikube') {
-    steps {
-        script {
-            // Delete all existing deployments
-            bat 'kubectl delete deployment --all'
-            echo "All existing deployments deleted"
+        stage('Deploy to Minikube') {
+            steps {
+                script {
+                    bat 'kubectl delete deployment --all'
+                    echo "All existing deployments deleted"
 
-            // Create a new deployment
-            bat 'kubectl create deployment ${container_name} --image=${IMAGE_NAME}:${BUILD_ID}'
+                    bat 'kubectl create deployment ${container_name} --image=${IMAGE_NAME}:${BUILD_ID}'
+                    echo "${container_name} successfully created"
 
-            echo "${container_name} successfully created"
+                    bat 'kubectl expose deployment ${container_name} --port=80 --type=LoadBalancer'
+                    echo "${container_name} is successfully deployed on port 80"
 
-            // Expose the deployment on port 80 as a LoadBalancer service
-            bat 'kubectl expose deployment ${container_name} --port=80 --type=LoadBalancer'
-            echo "${container_name} is successfully deployed on port 80"
-
-            // Get the service URL from Minikube
-            bat 'minikube service ${container_name}'
-            echo "Access application from the above link"
+                    bat 'minikube service ${container_name}'
+                    echo "Access application from the above link"
+                }
+            }
         }
     }
-}
-
-}
 }
