@@ -9,8 +9,8 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'docker_cred'
         KUBERNETES_CONTEXT = 'minikube'
         IMAGE_TAG = "${env.BUILD_ID}"
-        NEXUS_CREDENTIALS_ID = 'nexus-cred' // Nexus credentials ID
-        NEXUS_URL = 'http://localhost:8081/repository/maven-releases/
+        NEXUS_CREDENTIALS_ID = 'nexus-cred'
+        NEXUS_URL = 'http://localhost:8081/repository/maven-releases/'
     }
     tools {
         jdk 'JDK'
