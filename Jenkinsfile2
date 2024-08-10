@@ -99,7 +99,7 @@ pipeline {
         }
         stage('Deploy to Tomcat') {
             steps {
-                bat 'copy /Y target\\petclinic.war "C:\tomcat\webapps"'
+                bat 'copy /Y target\\petclinic.war "C:\\tomcat\\webapps"'
             }
         }
         stage('Parameters and Environment Variables Usage') {
