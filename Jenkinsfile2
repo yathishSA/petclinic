@@ -10,7 +10,7 @@ pipeline {
         KUBERNETES_CONTEXT = 'minikube'
         IMAGE_TAG = "${env.BUILD_ID}"
       //  NEXUS_CREDENTIALS_ID = 'nexus-cred'
-        GIT_CREDENTIALS_ID = 'git-cred'
+        GIT_CREDENTIALS_ID = 'github_secret_text_for_webhook'
        // NEXUS_URL = 'http://localhost:8081/repository/maven-releases/'
     }
     tools {
