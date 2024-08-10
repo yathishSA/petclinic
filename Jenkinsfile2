@@ -149,49 +149,15 @@ pipeline {
         }
          stage('Deploy to Minikube') {
             steps {
-                script {
-                    // Set Kubernetes context to Minikube
-                    bat "kubectl config use-context ${KUBERNETES_CONTEXT}"
-
-                    // Create deployment or update existing one
-                    bat """
-                        kubectl apply -f - <<EOF
-                        apiVersion: apps/v1
-                        kind: Deployment
-                        metadata:
-                          name: petclinic-project
-                        spec:
-                          replicas: 1
-                          selector:
-                            matchLabels:
-                              app: petclinic-project
-                          template:
-                            metadata:
-                              labels:
-                                app: petclinic-project
-                            spec:
-                              containers:
-                              - name: petclinic-container
-                                image: ${IMAGE_NAME}:${IMAGE_TAG}
-                                ports:
-                                - containerPort: 80
-                        EOF
-                    """
-                }
-            }
-        }
-        stage('Expose Service') {
-            steps {
-                script {
-                    // Expose the deployment as a LoadBalancer service
-                    bat """
-                        kubectl expose deployment petclinic-project --type=LoadBalancer --name=petclinic-service --port=80 --target-port=80
-                    """
-
-                    // Get the URL to access the service
-                    bat 'minikube service petclinic-service --url'
-                }
-            }
-        }
+                 bat 'minikube start'
+                echo "Minikube successfully started"
+                 bat 'kubectl create deployment ${container_name} --image=${IMAGE_NAME}:${env.BUILD_ID}'
+                echo "$deployment successfully created for deployment $container_name"
+                 bat 'kubectl expose deployment ${container_name} --port=80 --type=LoadBalancer'
+                echo "$container_name is successfully deployed on port 80"
+                bat 'minikube service ${container_name}'
+                echo "access application from below link"
     }
+}
+}
 }
