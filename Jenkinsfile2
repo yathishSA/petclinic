@@ -10,6 +10,7 @@ pipeline {
         KUBERNETES_CONTEXT = 'minikube'
         IMAGE_TAG = "${env.BUILD_ID}"
         GIT_CREDENTIALS_ID = 'git-cred-secret-text'
+        ZAP_HOME = 'C:\Program Files\ZAP\Zed Attack Proxy'
     }
     tools {
         jdk 'JDK'
@@ -35,7 +36,7 @@ pipeline {
                     """
                 }
             }
-        }
+        } /*
         stage('Maven Clean Package Creation') {
             parallel {
                 stage('Maven Validate') {
@@ -54,7 +55,7 @@ pipeline {
                     }
                 }
             }
-        }
+        } */
         stage('Maven Package Creation') {
             steps {
                 bat 'mvn clean package'
@@ -75,34 +76,18 @@ pipeline {
  stage('Run OWASP ZAP') {
             steps {
                 script {
-                    // Start OWASP ZAP as a background process
-                    def zapHome = tool name: 'OWASP'
-                    sh "${zapHome}/zap.sh -daemon -port 8084"
-                    
-                    // Wait for ZAP to start up (adjust the sleep time as needed)
-                    sleep 15
-                    
-                    // Run a quick scan using the ZAP CLI
-                    sh "${zapHome}/zap-cli quick-scan --self-contained --start-options '-config api.disablekey=true' http://your-app-url"
+                    bat 'start "" "%ZAP_HOME%\\zap.bat" -daemon -port 8081'
+                    sleep 15  // Wait for ZAP to start up
+                    bat '%ZAP_HOME%\\zap-cli.bat quick-scan --self-contained --start-options "-config api.disablekey=true" http://your-app-url'
                 }
             }
         }
 
         stage('Post-Scan Reporting') {
             steps {
-                // Generate and archive the report
                 script {
-                    def zapHome = tool name: 'OWASP'
-                    sh "${zapHome}/zap-cli report -o zap-report.html -f html"
+                    bat '%ZAP_HOME%\\zap-cli.bat report -o zap-report.html -f html'
                     archiveArtifacts artifacts: 'zap-report.html'
-                }
-            }
-        }
-    /*
-        stage('PR Approval Request') {
-            steps {
-                timeout(time: 300, unit: 'SECONDS') {
-                    input id: 'YES', message: 'Enter Yes or No for PR Request Creation.', ok: 'YES', submitter: 'admin', submitterParameter: 'approval'
                 }
             }
         } */
