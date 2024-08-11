@@ -55,10 +55,11 @@ pipeline {
             }
         }
         stage('Run OWASP Dependency check') {
-            steps {
-                    dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'OWASP'
-               }
-        }
+    steps {
+        dependencyCheck additionalArguments: '--format HTML --scan "C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\Ekart_Project\\target\\*.war"', 
+                        odcInstallation: 'OWASP'
+    }
+}
         stage('Create Pull Request') {
             steps {
                 script {
