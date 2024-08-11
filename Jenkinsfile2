@@ -27,7 +27,7 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/anmolmishra334/Petclinic.git'
             }
         }
- stage('Update Maven Version') {
+        stage('Update Maven Version') {
             steps {
                 script {
                     bat """
@@ -36,26 +36,7 @@ pipeline {
                     """
                 }
             }
-        } /*
-        stage('Maven Clean Package Creation') {
-            parallel {
-                stage('Maven Validate') {
-                    steps {
-                        bat 'mvn validate'
-                    }
-                }
-                stage('Maven Compile') {
-                    steps {
-                        bat 'mvn clean compile'
-                    }
-                }
-                stage('Maven Test') {
-                    steps {
-                        bat 'mvn test'
-                    }
-                }
-            }
-        } */
+        }
         stage('Maven Package Creation') {
             steps {
                 bat 'mvn clean package'
@@ -66,19 +47,22 @@ pipeline {
                 archiveArtifacts artifacts: 'target/*.war', followSymlinks: false
             }
         } 
-    stage('Upload Maven Package') {
-    steps {
-        script {
-            bat "mvn deploy"
-        }
-    }
-}
- stage('Run OWASP ZAP') {
+        stage('Upload Maven Package') {
             steps {
                 script {
-                    bat 'start "" "%ZAP_HOME%\\zap.bat" -daemon -port 8081'
+                    bat "mvn deploy"
+                }
+            }
+        }
+        stage('Run OWASP ZAP') {
+            steps {
+                script {
+                    // Start OWASP ZAP
+                    bat 'start "" ""%ZAP_HOME%\\zap.bat"" -daemon -port 8081'
                     sleep 15  // Wait for ZAP to start up
-                    bat '%ZAP_HOME%\\zap-cli.bat quick-scan --self-contained --start-options "-config api.disablekey=true" http://your-app-url'
+
+                    // Run OWASP ZAP quick-scan
+                    bat '""%ZAP_HOME%\\zap-cli.bat"" quick-scan --self-contained --start-options "-config api.disablekey=true" http://your-app-url'
                 }
             }
         }
@@ -86,7 +70,8 @@ pipeline {
         stage('Post-Scan Reporting') {
             steps {
                 script {
-                    bat '%ZAP_HOME%\\zap-cli.bat report -o zap-report.html -f html'
+                    // Generate and archive the OWASP ZAP report
+                    bat '""%ZAP_HOME%\\zap-cli.bat"" report -o zap-report.html -f html'
                     archiveArtifacts artifacts: 'zap-report.html'
                 }
             }
@@ -172,7 +157,7 @@ pipeline {
                     
                     // Run the Docker container on port 8083
                     bat "docker run -d -p 8083:8080 --name ${env.BUILD_ID}_container ${IMAGE_NAME}:${env.BUILD_ID}"
-                    echo "Container deployed on port 8082"
+                    echo "Container deployed on port 8083"
                 }
             }
         }
