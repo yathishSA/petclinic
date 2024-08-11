@@ -10,7 +10,7 @@ pipeline {
         KUBERNETES_CONTEXT = 'minikube'
         IMAGE_TAG = "${env.BUILD_ID}"
         GIT_CREDENTIALS_ID = 'git-cred-secret-text'
-        ZAP_HOME = 'C:\Program Files\ZAP\Zed Attack Proxy'
+        ZAP_HOME = 'C:\\Program Files\\ZAP\\Zed Attack Proxy'
     }
     tools {
         jdk 'JDK'
