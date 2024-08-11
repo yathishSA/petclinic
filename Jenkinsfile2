@@ -55,13 +55,9 @@ pipeline {
                 archiveArtifacts artifacts: 'target/*.war', followSymlinks: false
             }
         } 
-    stage('Upload Maven Package to GitHub') {
+    stage('Upload Maven Package') {
     steps {
         script {
-            // Set the artifact version in the pom.xml to include the Jenkins build ID
-            bat "mvn versions:set -DnewVersion=1.0.${env.BUILD_ID}"
-
-            // Deploy the package to GitHub
             bat "mvn deploy"
         }
     }
