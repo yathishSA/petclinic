@@ -54,28 +54,11 @@ pipeline {
                 }
             }
         }
-        stage('Run OWASP ZAP') {
+        stage('Run OWASP Dependency check') {
             steps {
-                script {
-                    // Start OWASP ZAP
-                    bat 'start "" ""%ZAP_HOME%\\zap.bat"" -daemon -port 8081'
-                    sleep 15  // Wait for ZAP to start up
-
-                    // Run OWASP ZAP quick-scan
-                    bat '""%ZAP_HOME%\\zap-cli.bat"" quick-scan --self-contained --start-options "-config api.disablekey=true" http://your-app-url'
-                }
-            }
+                    dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'OWASP'
+               }
         }
-
-        stage('Post-Scan Reporting') {
-            steps {
-                script {
-                    // Generate and archive the OWASP ZAP report
-                    bat '""%ZAP_HOME%\\zap-cli.bat"" report -o zap-report.html -f html'
-                    archiveArtifacts artifacts: 'zap-report.html'
-                }
-            }
-        } 
         stage('Create Pull Request') {
             steps {
                 script {
