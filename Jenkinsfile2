@@ -56,8 +56,13 @@ pipeline {
         }
         stage('Run OWASP Dependency check') {
     steps {
-        dependencyCheck additionalArguments: '--format HTML --scan "C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\Ekart_Project\\target\\*.war"', 
-                        odcInstallation: 'OWASP'
+        script {
+            def projectName = env.JOB_NAME.split('/')[0] // Extract project name
+            def targetPath = "C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\${projectName}\\target\\*.war"
+            
+            dependencyCheck additionalArguments: "--format HTML --scan \"${targetPath}\"", 
+                            odcInstallation: 'OWASP'
+        }
     }
 }
         stage('Create Pull Request') {
