@@ -159,7 +159,7 @@ pipeline {
                     bat "docker rm -f ${env.BUILD_ID}_container || true"
                     
                     // Run the Docker container on port 8082
-                    bat "docker run -d -p 8082:8080 --name ${env.BUILD_ID}_container ${IMAGE_NAME}:${env.BUILD_ID}"
+                    bat "docker run -d -p 8083:8080 --name ${env.BUILD_ID}_container ${IMAGE_NAME}:${env.BUILD_ID}"
                     echo "Container deployed on port 8082"
                 }
             }
