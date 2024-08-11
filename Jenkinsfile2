@@ -152,20 +152,15 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Minikube') {
+       stage('Deploy Docker Container') {
             steps {
                 script {
-                    bat 'kubectl delete deployment --all'
-                    echo "All existing deployments deleted"
-
-                    bat 'kubectl create deployment ${container_name} --image=${IMAGE_NAME}:${BUILD_ID}'
-                    echo "${container_name} successfully created"
-
-                    bat 'kubectl expose deployment ${container_name} --port=80 --type=LoadBalancer'
-                    echo "${container_name} is successfully deployed on port 80"
-
-                    bat 'minikube service ${container_name}'
-                    echo "Access application from the above link"
+                    // Stop any existing container with the same name
+                    bat "docker rm -f ${env.BUILD_ID}_container || true"
+                    
+                    // Run the Docker container on port 8082
+                    bat "docker run -d -p 8082:8080 --name ${env.BUILD_ID}_container ${IMAGE_NAME}:${env.BUILD_ID}"
+                    echo "Container deployed on port 8082"
                 }
             }
         }
