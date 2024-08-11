@@ -9,7 +9,7 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'docker_cred'
         KUBERNETES_CONTEXT = 'minikube'
         IMAGE_TAG = "${env.BUILD_ID}"
-        GIT_CREDENTIALS_ID = 'git-cred'
+        GIT_CREDENTIALS_ID = 'git-cred-secret-text'
     }
     tools {
         jdk 'JDK'
@@ -72,6 +72,33 @@ pipeline {
         }
     }
 }
+ stage('Run OWASP ZAP') {
+            steps {
+                script {
+                    // Start OWASP ZAP as a background process
+                    def zapHome = tool name: 'OWASP ZAP'
+                    sh "${zapHome}/zap.sh -daemon -port 8084"
+                    
+                    // Wait for ZAP to start up (adjust the sleep time as needed)
+                    sleep 15
+                    
+                    // Run a quick scan using the ZAP CLI
+                    sh "${zapHome}/zap-cli quick-scan --self-contained --start-options '-config api.disablekey=true' http://your-app-url"
+                }
+            }
+        }
+
+        stage('Post-Scan Reporting') {
+            steps {
+                // Generate and archive the report
+                script {
+                    def zapHome = tool name: 'OWASP ZAP'
+                    sh "${zapHome}/zap-cli report -o zap-report.html -f html"
+                    archiveArtifacts artifacts: 'zap-report.html'
+                }
+            }
+        }
+    }
         stage('PR Approval Request') {
             steps {
                 timeout(time: 300, unit: 'SECONDS') {
