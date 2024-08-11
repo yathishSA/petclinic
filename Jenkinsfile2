@@ -76,7 +76,7 @@ pipeline {
             steps {
                 script {
                     // Start OWASP ZAP as a background process
-                    def zapHome = tool name: 'OWASP ZAP'
+                    def zapHome = tool name: 'OWASP'
                     sh "${zapHome}/zap.sh -daemon -port 8084"
                     
                     // Wait for ZAP to start up (adjust the sleep time as needed)
@@ -92,20 +92,20 @@ pipeline {
             steps {
                 // Generate and archive the report
                 script {
-                    def zapHome = tool name: 'OWASP ZAP'
+                    def zapHome = tool name: 'OWASP'
                     sh "${zapHome}/zap-cli report -o zap-report.html -f html"
                     archiveArtifacts artifacts: 'zap-report.html'
                 }
             }
         }
-    
+    /*
         stage('PR Approval Request') {
             steps {
                 timeout(time: 300, unit: 'SECONDS') {
                     input id: 'YES', message: 'Enter Yes or No for PR Request Creation.', ok: 'YES', submitter: 'admin', submitterParameter: 'approval'
                 }
             }
-        }
+        } */
         stage('Create Pull Request') {
             steps {
                 script {
@@ -185,7 +185,7 @@ pipeline {
                     // Stop any existing container with the same name
                     bat "docker rm -f ${env.BUILD_ID}_container || true"
                     
-                    // Run the Docker container on port 8082
+                    // Run the Docker container on port 8083
                     bat "docker run -d -p 8083:8080 --name ${env.BUILD_ID}_container ${IMAGE_NAME}:${env.BUILD_ID}"
                     echo "Container deployed on port 8082"
                 }
