@@ -73,7 +73,7 @@ pipeline {
                 }
             }
         }
-    stage ('Sonarqube SRC check') {
+    stage ('Sonarqube SRC scanning') {
         steps {
                 script {
                     bat ''' mvn sonar:sonar -Dsonar.url=http://localhost:9000/ -Dsonar.login=squ_341a65ea8d951b263a9987977bf4a520a2de34b2
