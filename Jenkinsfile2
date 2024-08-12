@@ -54,6 +54,16 @@ pipeline {
                 }
             }
         }
+    stage ('Sonarqube SRC check') {
+        steps {
+                script {
+                    bat ''' mvn sonar:sonar -Dsonar.url=http://localhost:9000/ -Dsonar.login=squ_341a65ea8d951b263a9987977bf4a520a2de34b2
+                    -Dsonar.java.binaries=. \
+                    -Dsonar.projectKey="Ekart Project" '''
+                }
+        }
+
+    }
         stage('Run OWASP Dependency check') {
     steps {
         script {
