@@ -37,6 +37,25 @@ pipeline {
                 }
             }
         }
+        stage('Maven Artifact pre-setup'){
+        parallel {
+        stage ('Maven validate') {
+                steps {
+                        bat 'mvn validate'  
+                    }
+            }
+        stage ('Maven compile') {
+                steps {
+                        bat 'mvn clean complie'  
+                    }
+            }
+        stage ('Maven test') {
+                steps {
+                        bat 'mvn test'  
+                    }
+            }
+        }
+}
         stage('Maven Package Creation') {
             steps {
                 bat 'mvn clean package'
