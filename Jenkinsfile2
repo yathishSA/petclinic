@@ -46,7 +46,7 @@ pipeline {
             }
         stage ('Maven compile') {
                 steps {
-                        bat 'mvn clean complie'  
+                        bat 'mvn clean compile'  
                     }
             }
         stage ('Maven test') {
