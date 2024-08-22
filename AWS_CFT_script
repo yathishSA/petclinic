@@ -1,0 +1,183 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create a VPC with two public subnets in two availability zones, attached a Load Balancer and Auto Scaling Group, deployed Petclinic application on it.
+
+Resources:
+
+  Petclinic-EC2-public-subnet1:
+    Type: AWS::EC2::Instance
+    Properties:
+      AvailabilityZone: ap-south-1a
+      ImageId: ami-0f58b397bc5c1f2e8
+      InstanceType: t2.micro
+      KeyName: ansible_key_pair
+      Monitoring: true
+      SecurityGroups:
+        - default
+      BlockDeviceMappings:
+        - DeviceName: /dev/sdh
+          Ebs:
+            VolumeSize: 8
+            VolumeType: gp3
+
+  Petclinic-EC2-public-subnet2:
+    Type: AWS::EC2::Instance
+    Properties:
+      AvailabilityZone: ap-south-1b
+      ImageId: ami-0f58b397bc5c1f2e8
+      InstanceType: t2.micro
+      KeyName: ansible_key_pair
+      Monitoring: true
+      SecurityGroups:
+        - default
+      BlockDeviceMappings:
+        - DeviceName: /dev/sdh
+          Ebs:
+            VolumeSize: 8
+            VolumeType: gp3
+
+  Petclinic-VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: True
+      EnableDnsSupport: True
+
+  Petclinic-IG:
+    Type: AWS::EC2::InternetGateway
+
+  Petclinic-VPC-IG-connect:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId:
+        Ref: Petclinic-VPC
+      InternetGatewayId:
+        Ref: Petclinic-IG
+
+  Petclinic-Public-Subnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: ap-south-1a
+      CidrBlock: 10.0.1.0/24
+      VpcId:
+        Ref: Petclinic-VPC
+
+  Petclinic-Public-Subnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: ap-south-1b
+      CidrBlock: 10.0.2.0/24
+      VpcId:
+        Ref: Petclinic-VPC
+
+  Petclinic-route-table:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: Petclinic-VPC
+
+  Petclinic-routing-IG:
+    Type: AWS::EC2::Route
+    Properties:
+      GatewayId:
+        Ref: Petclinic-IG
+      RouteTableId:
+        Ref: Petclinic-route-table
+      DestinationCidrBlock: 0.0.0.0/0
+
+  Petclinic-public-subnet1-routing:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: Petclinic-route-table
+      SubnetId:
+        Ref: Petclinic-Public-Subnet1
+
+  Petclinic-public-subnet2-routing:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: Petclinic-route-table
+      SubnetId:
+        Ref: Petclinic-Public-Subnet2
+
+  Petclinic-public-subnet1-NACL:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId:
+        Ref: Petclinic-VPC
+
+  Petclinic-public-subnet1-NACL-connect:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      NetworkAclId:
+        Ref: Petclinic-public-subnet1-NACL
+      SubnetId:
+        Ref: Petclinic-Public-Subnet1
+
+  Petclinic-public-subnet2-NACL:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId:
+        Ref: Petclinic-VPC
+
+  Petclinic-public-subnet2-NACL-connect:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      NetworkAclId:
+        Ref: Petclinic-public-subnet2-NACL
+      SubnetId:
+        Ref: Petclinic-Public-Subnet2
+
+  Petclinic-VPC-LB-TG-Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - TargetGroupArn: !Ref Petclinic-LB-Target-Group
+          Type: forward
+      LoadBalancerArn: !Ref Petclinic-Load-Balancer
+      Port: 80
+      Protocol: HTTP
+
+  Petclinic-LB-Target-Group:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      IpAddressType: ipv4
+      Name: Petclinic-VPC-Project-LB-TG
+      Port: 8081
+      Protocol: HTTP
+      VpcId:
+        Ref: Petclinic-VPC
+      TargetType: instance
+      Targets:
+        - Id: !Ref Petclinic-EC2-public-subnet1
+        - Id: !Ref Petclinic-EC2-public-subnet2
+      UnhealthyThresholdCount: 2
+
+  Petclinic-Load-Balancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      IpAddressType: ipv4
+      Name: Petclinic-VPC-Project-Load-Balancer
+      Scheme: internet-facing
+      SecurityGroups:
+        - default
+      Subnets:
+        - Ref: Petclinic-Public-Subnet1
+        - Ref: Petclinic-Public-Subnet2
+      Type: application
+
+  Petclinic-Auto-Scaling-Group:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: Petclinic-VPC-Project-ASG
+      DesiredCapacity: 2
+      MaxSize: 4
+      MinSize: 2
+      HealthCheckType: EC2
+      HealthCheckGracePeriod: 300
+      LaunchTemplate:
+        LaunchTemplateId: lt-0fcb909dba693759f
+        Version: 1
+      VPCZoneIdentifier:
+        - Ref: Petclinic-Public-Subnet1
+        - Ref: Petclinic-Public-Subnet2
