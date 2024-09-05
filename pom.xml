@@ -551,6 +551,16 @@
             <name>Spring Milestone Repository</name>
             <url>https://repo.spring.io/milestone</url>
         </repository>
+              <repository>
+            <id>maven-releases</id>
+            <url>http://localhost:8081/repository/maven-releases/</url>
+        </repository>
     </repositories>
 
+    <distributionManagement>
+        <repository>
+            <id>maven-releases</id>
+            <url>http://localhost:8081/repository/maven-releases/</url>
+        </repository>
+    </distributionManagement>
 </project>
