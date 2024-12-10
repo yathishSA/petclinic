@@ -45,7 +45,28 @@ pipeline {
                sh "mvn clean package "
             }
         }
-        
+        stage('maven deplpy to nexus') {
+            steps {
+                configFileProvider([configFile(fileId: '53ba0752-efed-4359-9ba3-cd8add328396', variable: 'mavensettings')]) {
+                  sh "mvn -s $mavensettings clean deploy -DskipTests=true"
+                    
+                }
+                  
+            }
+        }
+       
+       stage('OWASP Dependency Check') {
+            steps {
+                dependencyCheck additionalArguments: '--scan target/', odcInstallation: 'owasp'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+       
+        stage('Deploy') {
+            steps {
+                sh  'cp /var/lib/jenkins/workspace/build-sonar/target/petclinic.war /opt/apache-tomcat-9.0.97/webapps'
+            }
+        }
         
         
     }
